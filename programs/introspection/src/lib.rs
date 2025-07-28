@@ -11,11 +11,12 @@ pub mod introspection {
         ctx: Context<CheckInstruction>,
         recipient: Pubkey,
         amount: u64,
+        instruction_index: u8,
     ) -> Result<()> {
-        // Load the first instruction (index 0)
-        let instruction = instructions::load_instruction_at_checked(0, &ctx.accounts.instructions_sysvar)?;
+        // Load the instruction at the specified index
+        let instruction = instructions::load_instruction_at_checked(instruction_index as usize, &ctx.accounts.instructions_sysvar)?;
 
-        // Check the program ID is SystemProgram
+        // Check the program ID is SystemProgram to prevent spoofing
         require_keys_eq!(
             instruction.program_id,
             solana_program::system_program::ID,
@@ -63,4 +64,6 @@ pub enum CustomError {
     InvalidRecipient,
     #[msg("Wrong transfer amount")]
     InvalidAmount,
+    #[msg("Invalid instruction index")]
+    InvalidInstructionIndex,
 }
