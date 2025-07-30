@@ -13,8 +13,18 @@ pub mod introspection {
         amount: u64,
         instruction_index: u8,
     ) -> Result<()> {
+        // SECURITY: 2-instruction limit is enforced by transaction structure
+        // Only allow instruction_index 0 or 1 (transfer + verification only)
+        require!(
+            instruction_index <= 1,
+            CustomError::InvalidInstructionIndex
+        );
+
         // Load the instruction at the specified index
-        let instruction = instructions::load_instruction_at_checked(instruction_index as usize, &ctx.accounts.instructions_sysvar)?;
+        let instruction = instructions::load_instruction_at_checked(
+            instruction_index as usize,
+            &ctx.accounts.instructions_sysvar
+        )?;
 
         // Check the program ID is SystemProgram to prevent spoofing
         require_keys_eq!(
